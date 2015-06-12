@@ -3,16 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v4.view.ViewPager
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <FrameLayout
-        android:id="@+id/map"
+        android:id="@+id/map_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <Button
+        android:id="@+id/draw_hist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:onClick="drawHistory"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:onClick="onClick"
         android:text="Draw History"
         android:textAllCaps="false" />
 

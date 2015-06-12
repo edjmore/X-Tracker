@@ -21,12 +21,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        String provider = locationManager.getBestProvider(criteria, true);
-        mCurrLocation = locationManager.getLastKnownLocation(provider);
-
         int[] buttonIds = {
                 R.id.start_tracking, R.id.stop_tracking, R.id.view_map
         };
@@ -51,8 +45,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             case R.id.view_map:
                 Intent viewMap = new Intent(this, MapActivity.class);
-                viewMap.putExtra(MapActivity.LAT, mCurrLocation.getLatitude());
-                viewMap.putExtra(MapActivity.LNG, mCurrLocation.getLongitude());
                 startActivity(viewMap);
                 break;
         }
