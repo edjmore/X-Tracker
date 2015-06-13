@@ -65,8 +65,8 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        LatLng target = new LatLng(mLocationHistory.get(0).getLatitude(),
-                mLocationHistory.get(0).getLongitude());
+        LatLngBounds bounds = latLngBounds(mLocationHistory);
+        LatLng target = center(bounds);
         float zoom = 14, tilt = 0, bearing = 0;
         CameraPosition center = new CameraPosition(target, zoom, tilt, bearing);
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(center);
@@ -78,7 +78,6 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_activity);
 
-        // TODO: remove
         initDebugLocationHistory();
 
         mMapFragment = MapFragment.newInstance();
@@ -97,13 +96,15 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
     private void drawRoute(ArrayList<Location> locations) {
         LatLngBounds bounds = latLngBounds(locations); // geographic perimeter of route
         GoogleMap map = mMapFragment.getMap();
-        Projection projection = map.getProjection();
-        Rect bitmapBox = graphicsPerimeter(bounds, projection); // dimensions for canvas
+        Projection mapProjection = map.getProjection();
+        Rect bitmapBox = graphicsPerimeter(bounds, mapProjection); // dimensions for canvas
 
         final Bitmap bitmap = Bitmap.createBitmap(bitmapBox.width(), bitmapBox.height(),
                 Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(bitmap);
-        drawDebugGraphics(canvas, bitmapBox);
+        // translation between geographic distances and pixels
+        OverlayProjection overlayProjection = new OverlayProjection(bounds, mapProjection);
+        drawDebugGraphics(canvas, overlayProjection);
 
         GroundOverlayOptions overlayOptions = new GroundOverlayOptions();
         overlayOptions.image(BitmapDescriptorFactory.fromBitmap(bitmap));
@@ -153,7 +154,58 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         return new Pair<>(width, height);
     }
 
-    private void drawDebugGraphics(final Canvas canvas, Rect perimeter) {
+    private class OverlayProjection {
+
+        double pixelsPerMeter;
+        Location northWest; // northwest corner of ground overlay
+
+        OverlayProjection(LatLngBounds bounds, Projection mapProjection) {
+            // get the northwest corner location
+            northWest = new Location("dummy_provider");
+            northWest.setLatitude(bounds.northeast.latitude);
+            northWest.setLongitude(bounds.southwest.longitude);
+            // create two arbitrary locations
+            LatLng ll0 = new LatLng(0, -1), ll1 = new LatLng(0, 1);
+            Point p0 = mapProjection.toScreenLocation(ll0), p1 = mapProjection.toScreenLocation(ll1);
+            double dPixels = p1.x - p0.x;
+            Location l0 = new Location("dummy_provider");
+            l0.setLatitude(ll0.latitude);
+            l0.setLongitude(ll0.longitude);
+            Location l1 = new Location("dummy_provider");
+            l1.setLatitude(ll1.latitude);
+            l1.setLongitude(ll1.longitude);
+            double dMeters = l0.distanceTo(l1);
+            // scale between geographic distance and screen pixels
+            pixelsPerMeter = dPixels / dMeters;
+        }
+
+        Point toScreenPoint(Location location) {
+            // create locations which differ from the northwest point in only one dimension
+            Location dLat = new Location(location);
+            dLat.setLongitude(northWest.getLongitude());
+            Location dLng = new Location(location);
+            dLng.setLatitude(northWest.getLatitude());
+            // get distances in meters
+            double dLatMeters = northWest.distanceTo(dLat);
+            double dLngMeters = northWest.distanceTo(dLng);
+            // convert to pixels
+            double dxPixels = pixelsPerMeter * dLngMeters;
+            double dyPixels = pixelsPerMeter * dLatMeters;
+            return new Point((int) dxPixels, (int) dyPixels);
+        }
+    }
+
+    private void drawDebugGraphics(final Canvas canvas, OverlayProjection projection) {
         canvas.drawColor(0x770000ff); // semi-transparent blue
+
+        final Paint circlePaint = new Paint();
+        circlePaint.setColor(0xffff0000); // red
+        circlePaint.setAntiAlias(true);
+        circlePaint.setDither(true);
+        
+        for (Location l : mLocationHistory) {
+            Point p = projection.toScreenPoint(l);
+            canvas.drawCircle(p.x, p.y, 16, circlePaint); // draw circles at each location
+        }
     }
 }
