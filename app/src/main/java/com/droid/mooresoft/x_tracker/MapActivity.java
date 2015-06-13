@@ -41,24 +41,22 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
     private ArrayList<Location> mLocationHistory = new ArrayList<>();
 
     private void initDebugLocationHistory() {
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location l1 = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        l1.setSpeed(5);
-        double lat = l1.getLatitude(), lng = l1.getLongitude();
-        Location l2 = new Location(l1), l3 = new Location(l1), l4 = new Location(l1);
-        l2.setLatitude(lat + 0.01);
-        l2.setLongitude(lng + 0.01);
-        l2.setSpeed(0);
-        l3.setLatitude(lat);
-        l3.setLongitude(lng - 0.01);
-        l3.setSpeed(10);
-        l4.setLatitude(lat + 0.01);
-        l4.setLongitude(lng - 0.01);
-        l4.setSpeed(15);
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location l0 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        l0.setSpeed(0);
+        Location l1 = new Location(l0);
+        l1.setLongitude(l0.getLongitude() + 0.01);
+        l1.setSpeed(2);
+        Location l2 = new Location(l1);
+        l2.setLatitude(l1.getLatitude() + 0.01);
+        l2.setSpeed(8);
+        Location l3 = new Location(l2);
+        l3.setLongitude(l2.getLongitude() - 0.01);
+        l3.setSpeed(1);
+        mLocationHistory.add(l0);
         mLocationHistory.add(l1);
         mLocationHistory.add(l2);
         mLocationHistory.add(l3);
-        mLocationHistory.add(l4);
     }
 
     private MapFragment mMapFragment;
@@ -96,16 +94,52 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
     private void drawRoute(ArrayList<Location> locations) {
         LatLngBounds bounds = latLngBounds(locations); // geographic perimeter of route
         GoogleMap map = mMapFragment.getMap();
+        map.clear(); // clear current map
         Projection mapProjection = map.getProjection();
         Rect bitmapBox = graphicsPerimeter(bounds, mapProjection); // dimensions for canvas
 
         final Bitmap bitmap = Bitmap.createBitmap(bitmapBox.width(), bitmapBox.height(),
                 Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(bitmap);
+        drawDebugGraphics(canvas);
         // translation between geographic distances and pixels
         OverlayProjection overlayProjection = new OverlayProjection(bounds, mapProjection);
-        drawDebugGraphics(canvas, overlayProjection);
 
+        final Paint gradientPaint = new Paint();
+        gradientPaint.setStrokeWidth(10);
+        gradientPaint.setAntiAlias(true);
+        gradientPaint.setDither(true);
+        // pick gradient color based on speed at each point
+        float maxSpeed = maxSpeed(locations);
+        ColorPicker colorPicker = new ColorPicker(maxSpeed);
+
+        for (int i = 0; i < locations.size(); i++) {
+            // get pair of consecutive locations
+            Location l0 = locations.get(i);
+            Point p0 = overlayProjection.toScreenPoint(l0);
+            if (i + 1 < locations.size()) {
+                Location l1 = locations.get(i + 1);
+                Point p1 = overlayProjection.toScreenPoint(l1);
+
+                // build shader
+                int color0 = colorPicker.color(l0.getSpeed());
+                int color1 = colorPicker.color(l1.getSpeed());
+                LinearGradient shader = new LinearGradient(p0.x, p0.y, p1.x, p1.y, color0, color1,
+                        Shader.TileMode.CLAMP);
+
+                gradientPaint.setShader(shader);
+                // draw connecting line
+                canvas.drawLine(p0.x, p0.y, p1.x, p1.y, gradientPaint);
+            }
+            // mark this location with a circle
+            CircleOptions circleOptions = new CircleOptions();
+            circleOptions.center(new LatLng(l0.getLatitude(), l0.getLongitude()));
+            circleOptions.radius(16);
+            circleOptions.fillColor(0xff000000); // solid black
+            map.addCircle(circleOptions);
+        }
+
+        // create overlay from bitmap we drew on
         GroundOverlayOptions overlayOptions = new GroundOverlayOptions();
         overlayOptions.image(BitmapDescriptorFactory.fromBitmap(bitmap));
         LatLng center = center(bounds);
@@ -154,6 +188,14 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         return new Pair<>(width, height);
     }
 
+    private float maxSpeed(ArrayList<Location> locations) {
+        float maxSpeed = 0;
+        for (Location l : locations) {
+            maxSpeed = Math.max(maxSpeed, l.getSpeed());
+        }
+        return maxSpeed;
+    }
+
     private class OverlayProjection {
 
         double pixelsPerMeter;
@@ -195,17 +237,24 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         }
     }
 
-    private void drawDebugGraphics(final Canvas canvas, OverlayProjection projection) {
-        canvas.drawColor(0x770000ff); // semi-transparent blue
+    private class ColorPicker {
 
-        final Paint circlePaint = new Paint();
-        circlePaint.setColor(0xffff0000); // red
-        circlePaint.setAntiAlias(true);
-        circlePaint.setDither(true);
-        
-        for (Location l : mLocationHistory) {
-            Point p = projection.toScreenPoint(l);
-            canvas.drawCircle(p.x, p.y, 16, circlePaint); // draw circles at each location
+        float maxSpeed;
+
+        ColorPicker(float maxSpeed) {
+            this.maxSpeed = maxSpeed;
         }
+
+        int color(float speed) {
+            float r = ((maxSpeed - speed) / maxSpeed) * 255; // get less red at higher speeds
+            float g = (speed / maxSpeed) * 255; // more green at higher speeds
+            float b = 0;
+            float mostlyOpaque = 222;
+            return Color.argb((int) mostlyOpaque, (int) r, (int) g, (int) b);
+        }
+    }
+
+    private void drawDebugGraphics(final Canvas canvas) {
+        canvas.drawColor(0x770000ff); // semi-transparent blue
     }
 }
