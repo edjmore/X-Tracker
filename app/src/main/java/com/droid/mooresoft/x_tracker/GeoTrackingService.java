@@ -17,6 +17,10 @@ import java.util.ArrayList;
  */
 public class GeoTrackingService extends Service {
 
+    public ArrayList<Location> getLocationHistory() {
+        return mLocationHistory;
+    }
+
     public class CustomBinder extends Binder {
 
         public GeoTrackingService getService() {
@@ -86,10 +90,6 @@ public class GeoTrackingService extends Service {
             mLocationManager.requestLocationUpdates(bestProvider, minTime, minDistance,
                     mLocationListener);
         }
-    }
-
-    public ArrayList<Location> getLocationHistory() {
-        return mLocationHistory;
     }
 
     @Override

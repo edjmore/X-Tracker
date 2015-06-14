@@ -2,9 +2,6 @@ package com.droid.mooresoft.x_tracker;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -12,14 +9,12 @@ import android.widget.Button;
 /**
  * Created by Ed on 6/10/15.
  */
-public class MainActivity extends Activity implements View.OnClickListener {
-
-    Location mCurrLocation;
+public class DebugActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.debug_activity);
 
         int[] buttonIds = {
                 R.id.start_tracking, R.id.stop_tracking, R.id.view_map
