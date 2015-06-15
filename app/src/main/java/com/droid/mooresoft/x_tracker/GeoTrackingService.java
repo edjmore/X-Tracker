@@ -1,7 +1,11 @@
 package com.droid.mooresoft.x_tracker;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.sqlite.SQLiteException;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -9,6 +13,8 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -17,23 +23,9 @@ import java.util.ArrayList;
  */
 public class GeoTrackingService extends Service {
 
-    public ArrayList<Location> getLocationHistory() {
-        return mLocationHistory;
-    }
-
-    public class CustomBinder extends Binder {
-
-        public GeoTrackingService getService() {
-            return GeoTrackingService.this;
-        }
-    }
-
-    private final IBinder mBinder = new CustomBinder();
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
+    public static final String PAUSE_TRACKING = "com.droid.mooresoft.x_tracker.PAUSE_TRACKING",
+            RESUME_TRACKING = "com.droid.mooresoft.x_tracker.RESUME_TRACKING",
+            END_TRACKING = "com.droid.mooresoft.x_tracker.END_TRACKING";
 
     private LocationManager mLocationManager;
     // TODO: use custom location object to save memory?
@@ -44,13 +36,42 @@ public class GeoTrackingService extends Service {
         init();
     }
 
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case PAUSE_TRACKING:
+                    Toast.makeText(context, R.string.tracking_paused, Toast.LENGTH_SHORT).show();
+                    unregisterListener(); // stop location updates
+                    break;
+
+                case RESUME_TRACKING:
+                    Toast.makeText(context, R.string.tracking_resumed, Toast.LENGTH_SHORT).show();
+                    registerListener(); // begin location updates again
+                    break;
+
+                case END_TRACKING:
+                    Toast.makeText(context, R.string.tracking_ended, Toast.LENGTH_SHORT).show();
+                    writeBack(); // save route data
+                    stopSelf(); // stop this service
+                    break;
+            }
+        }
+    };
+
     private void init() {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // initialize broadcast reciever
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(PAUSE_TRACKING);
+        filter.addAction(RESUME_TRACKING);
+        filter.addAction(END_TRACKING);
+        registerReceiver(mReceiver, filter);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        registerListener();
+        registerListener(); // begin location updates
         return START_NOT_STICKY; // don't restart service if it is killed
     }
 
@@ -85,19 +106,58 @@ public class GeoTrackingService extends Service {
         String bestProvider = mLocationManager.getBestProvider(criteria, enabledOnly);
         // TODO: ...or there are no enabled providers
         if (bestProvider != null) {
-            long minTime = 30 * 1000; // milliseconds
-            float minDistance = 50; // meters
+            long minTime = 3 * 1000; // milliseconds
+            float minDistance = 20; // meters
             mLocationManager.requestLocationUpdates(bestProvider, minTime, minDistance,
                     mLocationListener);
         }
     }
 
+    private void writeBack() {
+        DataSource dataSrc = new DataSource(this);
+        long id = -1;
+        try {
+            dataSrc.open();
+            Log.d(getClass().toString(), "Adding " + mLocationHistory.size() + " locations to database.");
+            id = dataSrc.addRoute(mLocationHistory, 0, 0);
+        } catch (SQLiteException sqle) {
+            sqle.printStackTrace();
+        } finally {
+            dataSrc.close();
+        }
+
+        // TODO: remove after debugging
+        Intent notify = new Intent();
+        notify.putExtra("id", id);
+        notify.setAction("notify");
+        sendBroadcast(notify); // let main activity know the write happened
+    }
+
     @Override
     public void onDestroy() {
-        unregisterListener();
+        unregisterListener(); // location listener
+        unregisterReceiver(mReceiver);
     }
 
     private void unregisterListener() {
         mLocationManager.removeUpdates(mLocationListener);
+    }
+
+    public ArrayList<Location> getLocationHistory() {
+        return mLocationHistory;
+    }
+
+    public class GeoTrackingBinder extends Binder {
+
+        GeoTrackingService getService() {
+            return GeoTrackingService.this;
+        }
+    }
+
+    private final IBinder mBinder = new GeoTrackingBinder();
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
     }
 }

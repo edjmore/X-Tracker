@@ -14,10 +14,24 @@
         android:textAllCaps="false" />
 
     <Button
-        android:id="@+id/stop_tracking"
+        android:id="@+id/pause_tracking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stop Tracking"
+        android:text="Pause Tracking"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/resume_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resume Tracking"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/end_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="End Tracking"
         android:textAllCaps="false" />
 
     <Button

@@ -1,5 +1,10 @@
 package com.droid.mooresoft.x_tracker;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,7 +15,9 @@ import android.graphics.Shader;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -28,6 +35,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 
 /**
  * Created by Ed on 6/11/15.
@@ -36,6 +44,8 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
 
     private MapFragment mMapFragment;
     private GroundOverlay mOverlay;
+
+    private long mRouteId = -1;
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
@@ -48,19 +58,45 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_activity);
 
+        // get route ID
+        mRouteId = getIntent().getLongExtra("id", -1);
+
+        // load map
         mMapFragment = MapFragment.newInstance();
         mMapFragment.getMapAsync(this);
         getFragmentManager().beginTransaction().add(R.id.map_container, mMapFragment).commit();
     }
 
     private ArrayList<Location> fetchRouteLocations() {
-        return getMockLocationHistory();
+        if (mRouteId == -1) {
+            return getMockLocationHistory();
+        } else {
+            ArrayList<Location> locations = null;
+            DataSource dataSrc = new DataSource(this);
+            try {
+                dataSrc.open();
+                locations = dataSrc.fetchLocationData(mRouteId);
+            } catch (SQLiteException sqle) {
+                sqle.printStackTrace();
+            } finally {
+                dataSrc.close();
+            }
+            if (locations == null) {
+                return getMockLocationHistory();
+            } else {
+                return locations;
+            }
+        }
     }
 
     private void drawRoute(final GoogleMap googleMap, final ArrayList<Location> locations) {
         // temporarily disable user interation until all drawing is complete
         final UiSettings uiSettings = googleMap.getUiSettings();
         uiSettings.setAllGesturesEnabled(false);
+        // remove the current overlay
+        if (mOverlay != null) {
+            mOverlay.remove();
+        }
 
         // want to zoom in on the area in which the route will be completely visible
         LatLngBounds.Builder builder = LatLngBounds.builder();
@@ -87,7 +123,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
                         int width = upperRight.x - lowerLeft.x,
                                 height = lowerLeft.y - upperRight.y; // pixels
 
-                        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        final Bitmap bitmap = Bitmap.createBitmap(width + 1, height + 1, Bitmap.Config.ARGB_8888);
                         final Canvas canvas = new Canvas(bitmap);
                         Point origin = new Point(lowerLeft.x, upperRight.y); // upper left of canvas
 
@@ -122,7 +158,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
                             options.position(new LatLng(l0.getLatitude(), l0.getLongitude()));
                             options.title(l0.getSpeed() + " m/s"); // show speed on click
                             options.icon(BitmapDescriptorFactory.fromResource(
-                                    R.mipmap.ic_launcher)); // TODO: change icon
+                                    R.drawable.abc_btn_rating_star_on_mtrl_alpha)); // TODO: change icon
                             googleMap.addMarker(options);
                         }
 
