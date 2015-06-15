@@ -115,22 +115,14 @@ public class GeoTrackingService extends Service {
 
     private void writeBack() {
         DataSource dataSrc = new DataSource(this);
-        long id = -1;
         try {
             dataSrc.open();
-            Log.d(getClass().toString(), "Adding " + mLocationHistory.size() + " locations to database.");
-            id = dataSrc.addRoute(mLocationHistory, 0, 0);
+            dataSrc.addRoute(mLocationHistory, 0, 0);
         } catch (SQLiteException sqle) {
             sqle.printStackTrace();
         } finally {
-            dataSrc.close();
+            if (dataSrc != null) dataSrc.close();
         }
-
-        // TODO: remove after debugging
-        Intent notify = new Intent();
-        notify.putExtra("id", id);
-        notify.setAction("notify");
-        sendBroadcast(notify); // let main activity know the write happened
     }
 
     @Override

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="8dp">
 
     <Button
         android:id="@+id/start_tracking"
@@ -34,11 +34,10 @@
         android:text="End Tracking"
         android:textAllCaps="false" />
 
-    <Button
-        android:id="@+id/view_map"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View Map"
-        android:textAllCaps="false" />
+    <ListView
+        android:id="@+id/route_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"></ListView>
 
 </LinearLayout>

@@ -5,28 +5,35 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Ed on 6/10/15.
  */
 public class DebugActivity extends Activity implements View.OnClickListener {
 
+    private RouteArrayAdapter mAdapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.debug_activity);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("notify");
-        registerReceiver(mReceiver, filter);
+        initListView();
 
         int[] buttonIds = {
                 R.id.start_tracking, R.id.pause_tracking, R.id.resume_tracking, R.id.end_tracking,
-                R.id.view_map
         };
         for (int id : buttonIds) {
             Button b = (Button) findViewById(id);
@@ -34,7 +41,29 @@ public class DebugActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    @Override
+    private void initListView() {
+        DataSource dataSrc = new DataSource(this);
+        try {
+            dataSrc.open();
+            Cursor cursor = dataSrc.fetchAllRoutes();
+            mAdapter = new RouteArrayAdapter(this, cursor, 0);
+            ListView list = (ListView) findViewById(R.id.route_list);
+            list.setAdapter(mAdapter);
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent viewMap = new Intent(DebugActivity.this, MapActivity.class);
+                    viewMap.putExtra("id", id);
+                    startActivity(viewMap);
+                }
+            });
+        } catch (SQLiteException sqle) {
+            sqle.printStackTrace();
+        } finally {
+            if (dataSrc != null) dataSrc.close();
+        }
+    }
+
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start_tracking:
@@ -59,28 +88,6 @@ public class DebugActivity extends Activity implements View.OnClickListener {
                 endTracking.setAction(GeoTrackingService.END_TRACKING);
                 sendBroadcast(endTracking);
                 break;
-
-            case R.id.view_map:
-                Intent viewMap = new Intent(this, MapActivity.class);
-                viewMap.putExtra("id", mRecentRouteId);
-                startActivity(viewMap);
-                break;
         }
-    }
-
-    private long mRecentRouteId = -1;
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mRecentRouteId = intent.getLongExtra("id", -1);
-            Toast.makeText(DebugActivity.this, "Recent route ID: " + mRecentRouteId, Toast.LENGTH_SHORT);
-        }
-    };
-
-    @Override
-    public void onDestroy() {
-        unregisterReceiver(mReceiver);
-        super.onDestroy();
     }
 }

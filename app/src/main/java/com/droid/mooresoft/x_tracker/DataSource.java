@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.location.Location;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.util.Pair;
 
@@ -40,9 +41,7 @@ public class DataSource {
 
         // now add location data for each point to the location data table
         final ContentValues locationDataValues = new ContentValues();
-        int i = 0;
         for (Location l : locations) {
-            Log.d(getClass().toString(), "Adding location " + i);
             // use the route ID to logically link the two tables
             locationDataValues.put(DatabaseHelper.LOCATION_DATA_ROUTE_ID, routeId);
             locationDataValues.put(DatabaseHelper.LOCATION_DATA_LATITUDE, l.getLatitude());
@@ -50,14 +49,17 @@ public class DataSource {
             locationDataValues.put(DatabaseHelper.LOCATION_DATA_SPEED, l.getSpeed());
             // each location will have its own row in the table
             mDatabase.insert(DatabaseHelper.LOCATION_DATA_TABLE, null, locationDataValues);
-            i++;
         }
 
         return routeId;
     }
 
-    public Pair<Float, Long> fetchRoute(long id) {
-        return new Pair<>(0f, 0xCAFEBABEl); // TODO: implement
+    public Cursor fetchAllRoutes() {
+        String[] allColumns = {
+                DatabaseHelper.ROUTE_ID, DatabaseHelper.ROUTE_DISTANCE,
+                DatabaseHelper.ROUTE_DATE
+        };
+        return mDatabase.query(DatabaseHelper.ROUTES_TABLE, allColumns, null, null, null, null, null);
     }
 
     public ArrayList<Location> fetchLocationData(long routeId) throws SQLiteException {
@@ -71,7 +73,6 @@ public class DataSource {
         };
         Cursor cursor = mDatabase.query(DatabaseHelper.LOCATION_DATA_TABLE, allColumns,
                 selectionClause, selectionArgs, null, null, null); // each cursor row is a location
-        Log.d(getClass().toString(), "Cursor found " + cursor.getCount() + " rows.");
 
         if (cursor == null) {
             throw new SQLiteException();
@@ -84,16 +85,13 @@ public class DataSource {
             int latIndex = cursor.getColumnIndex(DatabaseHelper.LOCATION_DATA_LATITUDE),
                     lngIndex = cursor.getColumnIndex(DatabaseHelper.LOCATION_DATA_LONGITUDE),
                     speedIndex = cursor.getColumnIndex(DatabaseHelper.LOCATION_DATA_SPEED);
-            int i = 0;
             while (cursor.moveToNext()) {
-                Log.d(getClass().toString(), "Fetching location " + i);
                 // build a location object from the row data
                 Location l = new Location("dummy_provider");
                 l.setLatitude(cursor.getDouble(latIndex));
                 l.setLongitude(cursor.getDouble(lngIndex));
                 l.setSpeed(cursor.getFloat(speedIndex));
                 locations.add(l);
-                i++;
             }
 
             return locations;
@@ -101,6 +99,16 @@ public class DataSource {
     }
 
     public void deleteRoute(long id) {
-        // TODO: implement
+        // first delete the location data
+        String whereClause = DatabaseHelper.LOCATION_DATA_ROUTE_ID + " = ?";
+        String[] whereArgs = new String[]{
+                String.valueOf(id)
+        };
+        mDatabase.delete(DatabaseHelper.LOCATION_DATA_TABLE, whereClause, whereArgs);
+
+        // now delete the route
+        whereClause = DatabaseHelper.ROUTE_ID + " = ?";
+        // still using ID for the args
+        mDatabase.delete(DatabaseHelper.ROUTES_TABLE, whereClause, whereArgs);
     }
 }

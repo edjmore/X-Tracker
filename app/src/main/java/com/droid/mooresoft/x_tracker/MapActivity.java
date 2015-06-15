@@ -13,6 +13,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +24,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 public class MapActivity extends ActionBarActivity implements OnMapReadyCallback {
 
     private MapFragment mMapFragment;
+    private ArrayList<Location> mLocations;
     private GroundOverlay mOverlay;
 
     @Override
@@ -41,16 +46,28 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_activity);
 
+        init();
+
         // load the map
         mMapFragment = MapFragment.newInstance();
         mMapFragment.getMapAsync(this);
         getFragmentManager().beginTransaction().add(R.id.map_container, mMapFragment).commit();
     }
 
+    private void init() {
+        getSupportActionBar().setTitle("This is the title");
+    }
+
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        ArrayList<Location> locations = fetchRouteLocations();
-        drawRoute(googleMap, locations);
+        mLocations = fetchRouteLocations();
+        Log.d(getLocalClassName(), mLocations.size() + "");
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                drawRoute(googleMap, mLocations);
+            }
+        });
     }
 
     private ArrayList<Location> fetchRouteLocations() {
@@ -71,7 +88,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
             } finally {
                 dataSrc.close();
             }
-            if (locations == null) {
+            if (locations == null || locations.size() <= 1) {
                 return getMockLocationHistory();
             } else {
                 return locations;
@@ -130,6 +147,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         }
         final float maxSpeed = ms; // will need this later
         final LatLngBounds bounds = builder.build();
+        Log.d(getLocalClassName(), bounds.toString());
         // padding is one tenth of map view width
         int padding = mMapFragment.getView().getWidth() / 10;
 
