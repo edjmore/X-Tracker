@@ -52,7 +52,12 @@ public class GeoTrackingService extends Service {
 
                 case END_TRACKING:
                     Toast.makeText(context, R.string.tracking_ended, Toast.LENGTH_SHORT).show();
-                    writeBack(); // save route data
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            writeBack(); // save route data
+                        }
+                    }.start();
                     stopSelf(); // stop this service
                     break;
             }
@@ -71,6 +76,7 @@ public class GeoTrackingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, R.string.tracking_started, Toast.LENGTH_SHORT).show();
         registerListener(); // begin location updates
         return START_NOT_STICKY; // don't restart service if it is killed
     }
@@ -114,15 +120,34 @@ public class GeoTrackingService extends Service {
     }
 
     private void writeBack() {
+        float routeDistance = calcDistance(mLocationHistory);
+        long date = getDate();
         DataSource dataSrc = new DataSource(this);
         try {
             dataSrc.open();
-            dataSrc.addRoute(mLocationHistory, 0, 0);
+            dataSrc.addRoute(mLocationHistory, routeDistance, date);
         } catch (SQLiteException sqle) {
             sqle.printStackTrace();
         } finally {
             if (dataSrc != null) dataSrc.close();
         }
+    }
+
+    private float calcDistance(ArrayList<Location> locations) {
+        float distance = 0; // accumulator
+        for (int i = 0; i < locations.size(); i++) {
+            if (i + 1 < locations.size()) {
+                Location l0 = locations.get(i),
+                        l1 = locations.get(i + 1); // consecutive locations
+                float d = l0.distanceTo(l1);
+                distance += d;
+            }
+        }
+        return distance; // meters
+    }
+
+    private long getDate() {
+        return System.currentTimeMillis();
     }
 
     @Override
