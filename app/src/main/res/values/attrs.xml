@@ -7,4 +7,9 @@
         <attr name="round_button_shadow_dx" format="integer" />
         <attr name="round_button_shadow_dy" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="StopwatchView">
+        <attr name="stopwatch_view_shadow_dx" format="integer" />
+        <attr name="stopwatch_view_shadow_dy" format="integer" />
+    </declare-styleable>
 </resources>

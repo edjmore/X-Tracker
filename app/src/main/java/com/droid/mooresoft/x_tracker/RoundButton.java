@@ -9,12 +9,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 
@@ -30,19 +27,19 @@ public class RoundButton extends Button {
 
     public RoundButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        getAttributes(context, attrs);
+        applyAttributes(context, attrs);
         init();
     }
 
     public RoundButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        getAttributes(context, attrs);
+        applyAttributes(context, attrs);
         init();
     }
 
     private int mIconResourceId, mCircleColor, mShadowDx, mShadowDy; // custom attributes
 
-    private void getAttributes(Context context, AttributeSet attrs) {
+    private void applyAttributes(Context context, AttributeSet attrs) {
         final TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
                 R.styleable.RoundButton, 0, 0);
         try {

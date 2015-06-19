@@ -6,12 +6,23 @@
     android:background="@android:color/background_light"
     android:orientation="vertical">
 
+    <!-- stopwatch -->
+    <com.droid.mooresoft.x_tracker.StopwatchView
+        android:id="@+id/controls_stopwatch"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="00:00:01"
+        android:textSize="64sp" />
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
     <com.droid.mooresoft.x_tracker.RoundButton
+        android:id="@+id/controls_pause"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
