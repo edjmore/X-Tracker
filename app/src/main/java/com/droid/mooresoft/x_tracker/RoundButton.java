@@ -120,6 +120,8 @@ public class RoundButton extends Button {
                 vHeight = getHeight() - getPaddingTop() - getPaddingBottom(); // allowed view dimension
         int radius = Math.min(vWidth, vHeight) / 2; // background circle radius
         int innerSquareSide = (int) (radius * Math.pow(2, 0.5)); // largest square contained within the circle
+        int padding = innerSquareSide / 10; // want a little padding around the icon
+        innerSquareSide -= padding;
 
         // will only make the bitmap smaller if necessary, never larger
         float widthScale = 1, heightScale = 1;
@@ -130,12 +132,10 @@ public class RoundButton extends Button {
             heightScale = (float) innerSquareSide / bHeight;
         }
 
-        // use the min scale to ensure both dimensions fit within the button view
+        // use the min scale to ensure both dimensions fit within the view
         float finalScale = Math.min(widthScale, heightScale);
-        int padding = innerSquareSide / 8; // want a little padding around the icon
-        int finalWidth = (int) (bWidth * finalScale) - padding,
-                finalHeight = (int) (bHeight * finalScale) - padding;
-
+        int finalWidth = (int) (bWidth * finalScale),
+                finalHeight = (int) (bHeight * finalScale);
         if (finalWidth <= 0 || finalHeight <= 0) {
             return b; // just give up
         }
