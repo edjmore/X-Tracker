@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="theme_primary">#5FAD56</color>
+    <color name="theme_secondary">#F2C14E</color>
+    <color name="theme_tertiary">#F78154</color>
+    <color name="theme_primary_alt">#4D9078</color>
+    <color name="theme_secondary_alt">#B4436C</color>
+</resources>

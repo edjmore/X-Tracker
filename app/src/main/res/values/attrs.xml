@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RoundButton">
+        <attr name="round_button_icon" format="integer" />
+        <attr name="round_button_color" format="color" />
+        <attr name="round_button_shadow_dx" format="integer" />
+        <attr name="round_button_shadow_dy" format="integer" />
+    </declare-styleable>
+</resources>
