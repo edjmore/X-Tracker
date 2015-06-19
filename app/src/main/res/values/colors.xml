@@ -7,4 +7,5 @@
     <color name="theme_tertiary">#F0F3BD</color>
     <color name="theme_primary_alt">#028090</color>
     <color name="theme_secondary_alt">#00A896</color>
+    <color name="text_color">#cc000000</color>
 </resources>

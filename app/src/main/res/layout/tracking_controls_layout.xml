@@ -9,10 +9,19 @@
     <!-- distance -->
     <com.droid.mooresoft.x_tracker.ShadowedTextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:text="00:00:01"
-        android:textSize="64sp" />
+        android:layout_height="wrap_content"
+        android:text="13.1"
+        android:textColor="@color/text_color"
+        android:textSize="64sp"
+        app:shadowed_text_view_shadow_dx="8"
+        app:shadowed_text_view_shadow_dy="8" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="miles" />
+
     <!-- stopwatch -->
     <com.droid.mooresoft.x_tracker.ShadowedTextView
         android:id="@+id/controls_stopwatch"
@@ -20,7 +29,10 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:text="00:00:01"
-        android:textSize="32sp" />
+        android:textColor="@color/text_color"
+        android:textSize="32sp"
+        app:shadowed_text_view_shadow_dx="6"
+        app:shadowed_text_view_shadow_dy="6" />
 
     <Space
         android:layout_width="match_parent"

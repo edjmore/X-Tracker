@@ -12,6 +12,8 @@ import android.graphics.Point;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 
@@ -52,9 +54,33 @@ public class RoundButton extends Button {
         }
     }
 
+    private int mRadius;
+    private Point mCenter;
+
     private void init() {
         // clear the background
         setBackgroundColor(0x00ffffff);
+
+        // circle will fill the view
+        mRadius = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
+                getHeight() - getPaddingTop() - getPaddingBottom()) / 2;
+        mRadius -= Math.max(mShadowDx, mShadowDy); // allow room for the shadow
+        mCenter = new Point(getWidth() / 2, getHeight() / 2); // center of the button
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // check if this touch is within the button radius
+        float x = Math.abs(event.getX() - mCenter.x),
+                y = Math.abs(event.getY() - mCenter.y); // distance from the button center
+        double x2 = Math.pow(x, 2), y2 = Math.pow(y, 2);
+        int touchRadius = (int) Math.pow(x2 + y2, 0.5);
+        
+        if (touchRadius > mRadius) {
+            return false; // don't treat this as a click
+        } else {
+            return super.onTouchEvent(event); // do normal touch stuff
+        }
     }
 
     @Override
@@ -105,10 +131,10 @@ public class RoundButton extends Button {
         canvas.drawColor(0x00ffffff); // clear the canvas
 
         // circle will fill the view
-        int radius = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
+        mRadius = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
                 getHeight() - getPaddingTop() - getPaddingBottom()) / 2;
-        radius -= Math.max(mShadowDx, mShadowDy); // allow room for the shadow
-        Point center = new Point(getWidth() / 2, getHeight() / 2); // center of the button
+        mRadius -= Math.max(mShadowDx, mShadowDy); // allow room for the shadow
+        mCenter = new Point(getWidth() / 2, getHeight() / 2); // center of the button
 
         // draw the shadow behind the circle
         final Paint mPaint = new Paint();
@@ -118,24 +144,24 @@ public class RoundButton extends Button {
         float[] stops = {
                 0, 0.9f, 1 // center, close to edge, outer edge
         };
-        RadialGradient gradient = new RadialGradient(center.x + mShadowDx, center.y + mShadowDy,
-                radius, colors, stops, Shader.TileMode.CLAMP);
+        RadialGradient gradient = new RadialGradient(mCenter.x + mShadowDx, mCenter.y + mShadowDy,
+                mRadius, colors, stops, Shader.TileMode.CLAMP);
         mPaint.setShader(gradient);
         mPaint.setAntiAlias(true); // sharpen edges
         mPaint.setDither(true); // improve color
-        canvas.drawCircle(center.x + mShadowDx, center.y + mShadowDy, radius, mPaint);
+        canvas.drawCircle(mCenter.x + mShadowDx, mCenter.y + mShadowDy, mRadius, mPaint);
 
         // draw the circle
         mPaint.setColor(mCircleColor);
         mPaint.setShader(null); // remove the radial gradient
-        canvas.drawCircle(center.x, center.y, radius, mPaint);
+        canvas.drawCircle(mCenter.x, mCenter.y, mRadius, mPaint);
 
         // draw the animation overlay circle if necessary
         if (percentOfRadius != 0) {
-            gradient = new RadialGradient(center.x, center.y, radius * percentOfRadius, 0x00000000, // transparent
+            gradient = new RadialGradient(mCenter.x, mCenter.y, mRadius * percentOfRadius, 0x00000000, // transparent
                     0x11000000, Shader.TileMode.CLAMP); // very faded black
             mPaint.setShader(gradient);
-            canvas.drawCircle(center.x, center.y, radius * percentOfRadius, mPaint);
+            canvas.drawCircle(mCenter.x, mCenter.y, mRadius * percentOfRadius, mPaint);
         }
 
         // draw icon if available
@@ -146,8 +172,8 @@ public class RoundButton extends Button {
             Bitmap b = BitmapFactory.decodeResource(getResources(), mIconResourceId);
             final Bitmap finalBitmap = scaleBitmap(b);
             mPaint.setShader(null); // remove radial gradient
-            canvas.drawBitmap(finalBitmap, center.x - finalBitmap.getWidth() / 2,
-                    center.y - finalBitmap.getHeight() / 2, mPaint);
+            canvas.drawBitmap(finalBitmap, mCenter.x - finalBitmap.getWidth() / 2,
+                    mCenter.y - finalBitmap.getHeight() / 2, mPaint);
         }
     }
 
