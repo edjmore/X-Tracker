@@ -60,7 +60,7 @@ public class RoundButton extends Button {
 
     @Override
     public boolean performClick() {
-        // TODO: animate
+        /// show a little animation when user taps on the view
         ValueAnimator valAnim = ValueAnimator.ofFloat(0, 1);
         valAnim.setInterpolator(new AccelerateDecelerateInterpolator());
         valAnim.setDuration(300); // milliseconds
@@ -131,6 +131,14 @@ public class RoundButton extends Button {
         mPaint.setShader(null); // remove the radial gradient
         canvas.drawCircle(center.x, center.y, radius, mPaint);
 
+        // draw the animation overlay circle if necessary
+        if (percentOfRadius != 0) {
+            gradient = new RadialGradient(center.x, center.y, radius * percentOfRadius, 0x00000000, // transparent
+                    0x11000000, Shader.TileMode.CLAMP); // very faded black
+            mPaint.setShader(gradient);
+            canvas.drawCircle(center.x, center.y, radius * percentOfRadius, mPaint);
+        }
+
         // draw icon if available
         if (mIconResourceId == -1) { // user did not provide an icon
             return;
@@ -138,18 +146,9 @@ public class RoundButton extends Button {
             // load and scale the bitmap to fit inside the button
             Bitmap b = BitmapFactory.decodeResource(getResources(), mIconResourceId);
             final Bitmap finalBitmap = scaleBitmap(b);
-            mPaint.setAntiAlias(true);
-            mPaint.setDither(true);
+            mPaint.setShader(null); // remove radial gradient
             canvas.drawBitmap(finalBitmap, center.x - finalBitmap.getWidth() / 2,
                     center.y - finalBitmap.getHeight() / 2, mPaint);
-        }
-
-        // draw the animation overlay circle if necessary
-        if (percentOfRadius != 0) {
-            gradient = new RadialGradient(center.x, center.y, radius * percentOfRadius, 0x00000000, // transparent
-                    0x11000000, Shader.TileMode.CLAMP); // very faded black
-            mPaint.setShader(gradient);
-            canvas.drawCircle(center.x, center.y, radius * percentOfRadius, mPaint);
         }
     }
 
