@@ -1,26 +1,20 @@
 package com.droid.mooresoft.x_tracker;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
+import android.graphics.Interpolator;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
-import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
-import android.widget.Toast;
 
 /**
  * Created by Ed on 6/16/15.
@@ -67,8 +61,45 @@ public class RoundButton extends Button {
     @Override
     public boolean performClick() {
         // TODO: animate
+        ValueAnimator valAnim = ValueAnimator.ofFloat(0, 1);
+        valAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+        valAnim.setDuration(300); // milliseconds
+        valAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                // animate the fraction of the circle the overlay covers
+                percentOfRadius = (float) animation.getAnimatedValue();
+                invalidate(); // redraw the view
+            }
+        });
+        valAnim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                // do nothing
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                percentOfRadius = 0; // remove the animation overlay
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                percentOfRadius = 0; // remove the animation overlay
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+                // do nothing
+            }
+        });
+        valAnim.start();
+
         return super.performClick(); // do normal click stuff
     }
+
+    // overlay circle radius as fraction of full radius
+    private float percentOfRadius = 0;
 
     @Override
     public void onDraw(final Canvas canvas) {
@@ -100,17 +131,25 @@ public class RoundButton extends Button {
         mPaint.setShader(null); // remove the radial gradient
         canvas.drawCircle(center.x, center.y, radius, mPaint);
 
+        // draw icon if available
         if (mIconResourceId == -1) { // user did not provide an icon
             return;
         } else {
             // load and scale the bitmap to fit inside the button
             Bitmap b = BitmapFactory.decodeResource(getResources(), mIconResourceId);
             final Bitmap finalBitmap = scaleBitmap(b);
-            final Paint iconPaint = new Paint();
-            iconPaint.setAntiAlias(true);
-            iconPaint.setDither(true);
+            mPaint.setAntiAlias(true);
+            mPaint.setDither(true);
             canvas.drawBitmap(finalBitmap, center.x - finalBitmap.getWidth() / 2,
-                    center.y - finalBitmap.getHeight() / 2, iconPaint);
+                    center.y - finalBitmap.getHeight() / 2, mPaint);
+        }
+
+        // draw the animation overlay circle if necessary
+        if (percentOfRadius != 0) {
+            gradient = new RadialGradient(center.x, center.y, radius * percentOfRadius, 0x00000000, // transparent
+                    0x11000000, Shader.TileMode.CLAMP); // very faded black
+            mPaint.setShader(gradient);
+            canvas.drawCircle(center.x, center.y, radius * percentOfRadius, mPaint);
         }
     }
 
