@@ -11,10 +11,14 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -62,6 +66,7 @@ public class RoundButton extends Button {
 
     @Override
     public boolean performClick() {
+        // TODO: animate
         return super.performClick(); // do normal click stuff
     }
 
@@ -112,19 +117,22 @@ public class RoundButton extends Button {
     private Bitmap scaleBitmap(Bitmap b) {
         int bWidth = b.getWidth(), bHeight = b.getHeight(); // bitmap dimensions
         int vWidth = getWidth() - getPaddingLeft() - getPaddingRight(),
-                vHeight = getHeight() - getPaddingTop() - getPaddingBottom(); // button view allowed dimension
+                vHeight = getHeight() - getPaddingTop() - getPaddingBottom(); // allowed view dimension
+        int radius = Math.min(vWidth, vHeight) / 2; // background circle radius
+        int innerSquareSide = (int) (radius * Math.pow(2, 0.5)); // largest square contained within the circle
 
         // will only make the bitmap smaller if necessary, never larger
         float widthScale = 1, heightScale = 1;
-        if (bWidth > vWidth) {
-            widthScale = (float) vWidth / bWidth;
+        if (bWidth > innerSquareSide) {
+            widthScale = (float) innerSquareSide / bWidth;
         }
-        if (bHeight > vHeight) {
-            heightScale = (float) vHeight / bHeight;
+        if (bHeight > innerSquareSide) {
+            heightScale = (float) innerSquareSide / bHeight;
         }
+
         // use the min scale to ensure both dimensions fit within the button view
         float finalScale = Math.min(widthScale, heightScale);
-        int padding = Math.min(vWidth, vHeight) / 10; // add a little padding around the icon
+        int padding = innerSquareSide / 8; // want a little padding around the icon
         int finalWidth = (int) (bWidth * finalScale) - padding,
                 finalHeight = (int) (bHeight * finalScale) - padding;
 

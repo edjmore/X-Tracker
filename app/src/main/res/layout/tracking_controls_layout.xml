@@ -17,27 +17,24 @@
             android:id="@+id/button_1"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="16dp"
             android:layout_weight="1"
-            android:padding="8dp"
+            android:padding="0dp"
             app:round_button_color="@color/theme_secondary"
             app:round_button_icon="@mipmap/ic_launcher" />
 
         <com.droid.mooresoft.x_tracker.RoundButton
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="16dp"
             android:layout_weight="1"
-            android:padding="8dp"
+            android:padding="16dp"
             app:round_button_color="@color/theme_tertiary"
             app:round_button_icon="@mipmap/ic_launcher" />
 
         <com.droid.mooresoft.x_tracker.RoundButton
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="16dp"
             android:layout_weight="1"
-            android:padding="8dp"
+            android:padding="32dp"
             app:round_button_color="@color/theme_primary_alt"
             app:round_button_icon="@mipmap/ic_launcher" />
     </LinearLayout>
