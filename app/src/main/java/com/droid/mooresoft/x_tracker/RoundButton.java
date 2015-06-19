@@ -14,6 +14,7 @@ import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -61,7 +62,6 @@ public class RoundButton extends Button {
 
     @Override
     public boolean performClick() {
-        Toast.makeText(getContext(), "Paused.", Toast.LENGTH_SHORT).show();
         return super.performClick(); // do normal click stuff
     }
 
