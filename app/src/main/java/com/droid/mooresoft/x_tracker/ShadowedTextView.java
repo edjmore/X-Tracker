@@ -54,7 +54,9 @@ public class ShadowedTextView extends TextView {
     public void onDraw(final Canvas canvas) {
         if (mShadowDx != 0 || mShadowDy != 0) { // draw a shadow behind the text
             final Paint shadowPaint = new Paint();
-            shadowPaint.setColor(0x11000000); // very faded black
+            shadowPaint.setColor(0x33000000); // very faded black
+            shadowPaint.setAntiAlias(true);
+            shadowPaint.setDither(true);
 
             String text = getText().toString(); // user text
             shadowPaint.setTextAlign(Paint.Align.CENTER);

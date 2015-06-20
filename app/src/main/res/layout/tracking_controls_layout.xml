@@ -6,13 +6,18 @@
     android:background="@android:color/background_light"
     android:orientation="vertical">
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.2" />
+
     <!-- distance -->
     <com.droid.mooresoft.x_tracker.ShadowedTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="13.1"
-        android:textColor="@color/text_color"
-        android:textSize="64sp"
+        android:textColor="@color/theme_text"
+        android:textSize="72sp"
         app:shadowed_text_view_shadow_dx="8"
         app:shadowed_text_view_shadow_dy="8" />
 
@@ -20,34 +25,64 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="miles" />
-
-    <!-- stopwatch -->
-    <com.droid.mooresoft.x_tracker.ShadowedTextView
-        android:id="@+id/controls_stopwatch"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="00:00:01"
-        android:textColor="@color/text_color"
-        android:textSize="32sp"
-        app:shadowed_text_view_shadow_dx="6"
-        app:shadowed_text_view_shadow_dy="6" />
+        android:text="miles"
+        android:textColor="@color/theme_text"
+        android:textSize="24sp" />
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="0.2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.2"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_time" />
+
+        <!-- stopwatch -->
+        <com.droid.mooresoft.x_tracker.ShadowedTextView
+            android:id="@+id/controls_stopwatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00:01"
+            android:textColor="@color/theme_text"
+            android:textSize="38sp"
+            app:shadowed_text_view_shadow_dx="6"
+            app:shadowed_text_view_shadow_dy="6" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4.5" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.2" />
 
     <com.droid.mooresoft.x_tracker.RoundButton
         android:id="@+id/controls_pause"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        app:round_button_color="@color/theme_secondary_alt" />
+        android:layout_weight="0.45"
+        app:round_button_color="@color/theme_yellow"
+        app:round_button_icon="@drawable/ic_action_pause" />
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="0.2" />
 </LinearLayout>
