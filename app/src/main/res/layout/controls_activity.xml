@@ -26,7 +26,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="miles"
-        android:textColor="@color/theme_text"
         android:textSize="24sp" />
 
     <Space
