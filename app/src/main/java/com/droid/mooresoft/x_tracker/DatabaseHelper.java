@@ -20,6 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // columns
     public static final String ROUTE_ID = "_id",
             ROUTE_DISTANCE = "distance",
+            ROUTE_ELAPSED_TIME = "elapsed_time",
             ROUTE_DATE = "date";
     public static final String LOCATION_DATA_ID = "_id",
             LOCATION_DATA_ROUTE_ID = "route_id",
@@ -30,6 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String CREATE_ROUTES_TABLE = "create table " + ROUTES_TABLE + "(" +
             ROUTE_ID + " integer primary key autoincrement, " +
             ROUTE_DISTANCE + " float, " +
+            ROUTE_ELAPSED_TIME + " long, " +
             ROUTE_DATE + " long);";
 
     private static final String CREATE_LOCATION_DATA_TABLE = "create table " + LOCATION_DATA_TABLE + "(" +

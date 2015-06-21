@@ -75,51 +75,52 @@ public class RoundButton extends Button {
                 y = Math.abs(event.getY() - mCenter.y); // distance from the button center
         double x2 = Math.pow(x, 2), y2 = Math.pow(y, 2);
         int touchRadius = (int) Math.pow(x2 + y2, 0.5);
-        
+
         if (touchRadius > mRadius) {
             return false; // don't treat this as a click
         } else {
-            return super.onTouchEvent(event); // do normal touch stuff
+            // show a little animation when user taps on the view
+            ValueAnimator valAnim = ValueAnimator.ofFloat(0, 1);
+            valAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+            valAnim.setDuration(300); // milliseconds
+            valAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    // animate the fraction of the circle the overlay covers
+                    percentOfRadius = (float) animation.getAnimatedValue();
+                    invalidate(); // redraw the view
+                }
+            });
+            valAnim.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    // do nothing
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    percentOfRadius = 0; // remove the animation overlay
+                    performClick();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    percentOfRadius = 0; // remove the animation overlay
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                    // do nothing
+                }
+            });
+            valAnim.start();
+
+            return false; // don't do anything until the animation completes
         }
     }
 
     @Override
     public boolean performClick() {
-        /// show a little animation when user taps on the view
-        ValueAnimator valAnim = ValueAnimator.ofFloat(0, 1);
-        valAnim.setInterpolator(new AccelerateDecelerateInterpolator());
-        valAnim.setDuration(300); // milliseconds
-        valAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                // animate the fraction of the circle the overlay covers
-                percentOfRadius = (float) animation.getAnimatedValue();
-                invalidate(); // redraw the view
-            }
-        });
-        valAnim.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                // do nothing
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                percentOfRadius = 0; // remove the animation overlay
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                percentOfRadius = 0; // remove the animation overlay
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-                // do nothing
-            }
-        });
-        valAnim.start();
-
         return super.performClick(); // do normal click stuff
     }
 

@@ -32,10 +32,11 @@ public class DataSource {
         mDatabase.close();
     }
 
-    public long addRoute(ArrayList<Location> locations, float distance, long date) {
+    public long addRoute(ArrayList<Location> locations, float distance, long elapsedTime, long date) {
         // first add to the table of routes
         ContentValues routeValues = new ContentValues();
         routeValues.put(DatabaseHelper.ROUTE_DISTANCE, distance);
+        routeValues.put(DatabaseHelper.ROUTE_ELAPSED_TIME, elapsedTime);
         routeValues.put(DatabaseHelper.ROUTE_DATE, date);
         long routeId = mDatabase.insert(DatabaseHelper.ROUTES_TABLE, null, routeValues);
 
@@ -57,7 +58,7 @@ public class DataSource {
     public Cursor fetchAllRoutes() {
         String[] allColumns = {
                 DatabaseHelper.ROUTE_ID, DatabaseHelper.ROUTE_DISTANCE,
-                DatabaseHelper.ROUTE_DATE
+                DatabaseHelper.ROUTE_ELAPSED_TIME, DatabaseHelper.ROUTE_DATE
         };
         return mDatabase.query(DatabaseHelper.ROUTES_TABLE, allColumns, null, null, null, null, null);
     }
