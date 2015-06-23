@@ -1,6 +1,8 @@
 package com.droid.mooresoft.x_tracker;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
@@ -17,15 +19,37 @@ public class MainActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-
-        // TODO: list view
-
+        init();
     }
 
     private ListView mListView;
 
     private void init() {
         mListView = (ListView) findViewById(R.id.main_list);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // load all data
+        DataSource dataSrc = new DataSource(this);
+        try {
+            dataSrc.open();
+            // get all route data
+            Cursor routesCursor = dataSrc.fetchAllRoutes();
+            // populate the list view with data
+            if (mAdapter == null) {
+                mAdapter = new RouteArrayAdapter(this, routesCursor, 0);
+                mListView.setAdapter(mAdapter);
+            } else {
+                mAdapter.swapCursor(routesCursor);
+            }
+        } catch (SQLiteException sqle) {
+            sqle.printStackTrace();
+        } finally {
+            if (dataSrc != null) dataSrc.close();
+        }
     }
 
     public void performClick(View view) {

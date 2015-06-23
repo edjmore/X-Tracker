@@ -44,6 +44,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2"
+        android:gravity="center"
         android:text="00:00:01"
         android:textColor="@color/theme_text"
         android:textSize="26sp"
