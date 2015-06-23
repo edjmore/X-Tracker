@@ -55,17 +55,17 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
     }
 
     private void init() {
-        getSupportActionBar().setTitle("This is the title");
+        // TODO: change to something relevant
+        getSupportActionBar().setTitle(R.string.app_name);
     }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mLocations = fetchRouteLocations();
-        Log.d(getLocalClassName(), mLocations.size() + "");
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                drawRoute(googleMap, mLocations);
+                if (mLocations != null && !mLocations.isEmpty()) drawRoute(googleMap, mLocations);
             }
         });
     }
@@ -75,7 +75,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         long routeId = getIntent().getLongExtra("id", -1);
 
         if (routeId == -1) {
-            return getMockLocationHistory();
+            return null;
 
         } else {
             ArrayList<Location> locations = null;
@@ -88,11 +88,8 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
             } finally {
                 dataSrc.close();
             }
-            if (locations == null || locations.size() <= 1) {
-                return getMockLocationHistory();
-            } else {
-                return locations;
-            }
+            // may be null
+            return locations;
         }
     }
 

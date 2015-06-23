@@ -22,14 +22,6 @@ public class ControlsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.controls_activity);
         init();
-
-        // start and bind with the tracking service
-        Intent service = new Intent(this, XTrackingService.class);
-        bindService(service, mConnection, BIND_AUTO_CREATE);
-        if (!XTrackingService.IS_RUNNING) startService(new Intent(this, XTrackingService.class));
-
-        // begin continuous UI updates
-        mUiHandler.post(mUiRunner);
     }
 
     private TextView mDistanceView, mStopwatchView;
@@ -43,6 +35,19 @@ public class ControlsActivity extends ActionBarActivity {
         mResumeButton = (RoundButton) findViewById(R.id.controls_resume);
         mPauseButton = (RoundButton) findViewById(R.id.controls_pause);
         mEndButton = (RoundButton) findViewById(R.id.controls_end);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // start and bind with the tracking service
+        Intent service = new Intent(this, XTrackingService.class);
+        bindService(service, mConnection, BIND_AUTO_CREATE);
+        if (!XTrackingService.IS_RUNNING) startService(new Intent(this, XTrackingService.class));
+
+        // begin continuous UI updates
+        mUiHandler.post(mUiRunner);
     }
 
     private XTrackingService mBoundService;
@@ -124,8 +129,8 @@ public class ControlsActivity extends ActionBarActivity {
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
+        super.onStop();
         if (mIsBound) unbindService(mConnection);
-        super.onPause();
     }
 }

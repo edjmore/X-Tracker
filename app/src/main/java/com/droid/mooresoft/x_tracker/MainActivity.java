@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 /**
@@ -26,6 +27,16 @@ public class MainActivity extends ActionBarActivity {
 
     private void init() {
         mListView = (ListView) findViewById(R.id.main_list);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                long routeId = view.getId();
+                // TODO: want to start the route details activity
+                Intent details = new Intent(MainActivity.this, MapActivity.class);
+                details.putExtra("id", routeId);
+                startActivity(details);
+            }
+        });
     }
 
     @Override

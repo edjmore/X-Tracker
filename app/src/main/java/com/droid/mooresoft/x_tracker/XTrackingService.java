@@ -13,7 +13,6 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -124,27 +123,28 @@ public class XTrackingService extends Service {
         // pause the timer
         final long elapsed = mStopwatch.stop();
 
-        // store route data in the database
-        final DataSource dataSrc = new DataSource(this);
-        new Thread() { // do the write on a background thread
-            @Override
-            public void run() {
-                // calculate other route data values
-                long date = System.currentTimeMillis();
+        if (!mLocationHistory.isEmpty()) { // store route data in the database
+            final DataSource dataSrc = new DataSource(this);
+            new Thread() { // do the write on a background thread
+                @Override
+                public void run() {
+                    // calculate other route data values
+                    long date = System.currentTimeMillis();
 
-                try {
-                    dataSrc.open();
-                    // add the new route
-                    dataSrc.addRoute(mLocationHistory, mDistance, elapsed, date);
-                } catch (SQLiteException sqle) {
-                    sqle.printStackTrace();
-                } finally {
-                    if (dataSrc != null) dataSrc.close(); // avoid database leak
+                    try {
+                        dataSrc.open();
+                        // add the new route
+                        dataSrc.addRoute(mLocationHistory, mDistance, elapsed, date);
+                    } catch (SQLiteException sqle) {
+                        sqle.printStackTrace();
+                    } finally {
+                        if (dataSrc != null) dataSrc.close(); // avoid database leak
+                    }
                 }
-            }
-        }.start();
-
-        stopSelf(); // service is no longer needed
+            }.start();
+        }
+        // service is no longer needed
+        stopSelf();
     }
 
     // for tracking elapsed time
