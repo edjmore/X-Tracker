@@ -224,8 +224,9 @@ public class XTrackingService extends Service {
         }
 
         long stop() {
-            // add the most recent elapsed time
-            mElapsedTime += System.currentTimeMillis() - mStartTime;
+            if (mStartTime != -1) { // add the most recent elapsed time
+                mElapsedTime += System.currentTimeMillis() - mStartTime;
+            }
             mStartTime = -1;
             return mElapsedTime;
         }

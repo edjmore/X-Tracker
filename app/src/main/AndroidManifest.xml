@@ -27,9 +27,11 @@
         </activity>
         <activity
             android:name=".MapActivity"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ControlsActivity"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
 
         <service android:name=".XTrackingService" />

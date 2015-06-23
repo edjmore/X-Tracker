@@ -70,6 +70,8 @@ public class RoundButton extends Button {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!isEnabled()) return false;
+        
         // check if this touch is within the button radius
         float x = Math.abs(event.getX() - mCenter.x),
                 y = Math.abs(event.getY() - mCenter.y); // distance from the button center

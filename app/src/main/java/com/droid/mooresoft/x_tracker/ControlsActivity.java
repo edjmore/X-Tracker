@@ -96,6 +96,7 @@ public class ControlsActivity extends ActionBarActivity {
             case R.id.controls_resume:
                 controlIntent.setAction(XTrackingService.ACTION_RESUME);
                 // enable pause and end
+                mResumeButton.setEnabled(false);
                 mPauseButton.setEnabled(true);
                 mEndButton.setEnabled(false);
                 break;
@@ -104,6 +105,7 @@ public class ControlsActivity extends ActionBarActivity {
                 controlIntent.setAction(XTrackingService.ACTION_PAUSE);
                 // enable resume and end
                 mResumeButton.setEnabled(true);
+                mPauseButton.setEnabled(false);
                 mEndButton.setEnabled(true);
                 break;
 
