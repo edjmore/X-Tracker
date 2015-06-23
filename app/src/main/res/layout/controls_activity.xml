@@ -13,9 +13,10 @@
 
     <!-- distance -->
     <com.droid.mooresoft.x_tracker.ShadowedTextView
+        android:id="@+id/controls_distance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="13.1"
+        android:gravity="center"
         android:textColor="@color/theme_text"
         android:textSize="72sp"
         app:shadowed_text_view_shadow_dx="8"
@@ -36,26 +37,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.2"
+        android:layout_weight="0.4"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4" />
+            android:layout_weight="1" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:src="@drawable/ic_action_time" />
 
         <!-- stopwatch -->
         <com.droid.mooresoft.x_tracker.ShadowedTextView
             android:id="@+id/controls_stopwatch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00:01"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:gravity="center"
             android:textColor="@color/theme_text"
             android:textSize="38sp"
             app:shadowed_text_view_shadow_dx="6"
@@ -64,21 +67,49 @@
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4.5" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.2" />
+        android:layout_weight="0.1" />
 
-    <com.droid.mooresoft.x_tracker.RoundButton
-        android:id="@+id/controls_pause"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.45"
-        app:round_button_color="@color/theme_yellow"
-        app:round_button_icon="@drawable/ic_action_pause" />
+        android:layout_weight="0.5"
+        android:orientation="horizontal">
+
+        <com.droid.mooresoft.x_tracker.RoundButton
+            android:id="@+id/controls_resume"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:onClick="performClick"
+            app:round_button_color="@color/theme_green"
+            app:round_button_icon="@drawable/ic_action_play" />
+
+        <com.droid.mooresoft.x_tracker.RoundButton
+            android:id="@+id/controls_pause"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="performClick"
+            app:round_button_color="@color/theme_yellow"
+            app:round_button_icon="@drawable/ic_action_pause" />
+
+        <com.droid.mooresoft.x_tracker.RoundButton
+            android:id="@+id/controls_end"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:onClick="performClick"
+            app:round_button_color="@color/theme_red"
+            app:round_button_icon="@drawable/ic_action_stop" />
+    </LinearLayout>
 
     <Space
         android:layout_width="match_parent"

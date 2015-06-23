@@ -13,6 +13,8 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -21,13 +23,27 @@ import java.util.ArrayList;
  */
 public class XTrackingService extends Service {
 
-    class XBinder extends Binder {
+    public static boolean IS_RUNNING = false;
+
+    public class XBinder extends Binder {
         XTrackingService getService() {
             return XTrackingService.this;
         }
     }
 
     private final XBinder mBinder = new XBinder();
+
+    public ArrayList<Location> getLocationHistory() {
+        return mLocationHistory;
+    }
+
+    public float getDistance() {
+        return mDistance;
+    }
+
+    public long getElapsedTime() {
+        return mStopwatch.check();
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -44,7 +60,10 @@ public class XTrackingService extends Service {
     private void init() {
         // register receiver for tracking control broadcasts
         IntentFilter filter = new IntentFilter();
-        filter.addCategory(CATEGORY_TRACKING_LIFECYCLE);
+        // all control actions
+        filter.addAction(ACTION_RESUME);
+        filter.addAction(ACTION_PAUSE);
+        filter.addAction(ACTION_END);
         registerReceiver(mReciever, filter);
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -52,9 +71,6 @@ public class XTrackingService extends Service {
 
     private static final String PACKAGE = "com.droid.mooresoft.x_tracker";
 
-    // tracking controls intent category
-    public static final String CATEGORY_TRACKING_LIFECYCLE = PACKAGE +
-            ".CATEGORY_TRACKING_LIFECYCLE";
     // receivable actions for controlling tracking
     public static final String ACTION_RESUME = PACKAGE + ".ACTION_RESUME",
             ACTION_PAUSE = PACKAGE + ".ACTION_PAUSE",
@@ -63,6 +79,7 @@ public class XTrackingService extends Service {
     private final BroadcastReceiver mReciever = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             switch (intent.getAction()) {
                 // perform the appropriate control action
                 case ACTION_RESUME:
@@ -81,6 +98,8 @@ public class XTrackingService extends Service {
     };
 
     private void resumeTracking() {
+        Toast.makeText(this, R.string.tracking_resumed, Toast.LENGTH_SHORT).show();
+
         // resume location updates
         String bestProvider = chooseLocationProvider();
         beginLocationTracking(bestProvider);
@@ -89,6 +108,8 @@ public class XTrackingService extends Service {
     }
 
     private void pauseTracking() {
+        Toast.makeText(this, R.string.tracking_paused, Toast.LENGTH_SHORT).show();
+
         // stop the location updates
         mLocationManager.removeUpdates(mLocationListener);
         // pause the timer
@@ -96,6 +117,8 @@ public class XTrackingService extends Service {
     }
 
     private void endTracking() {
+        Toast.makeText(this, R.string.tracking_ended, Toast.LENGTH_SHORT).show();
+
         // stop the location updates
         mLocationManager.removeUpdates(mLocationListener);
         // pause the timer
@@ -107,13 +130,12 @@ public class XTrackingService extends Service {
             @Override
             public void run() {
                 // calculate other route data values
-                float distance = calcDistance(mLocationHistory);
                 long date = System.currentTimeMillis();
 
                 try {
                     dataSrc.open();
                     // add the new route
-                    dataSrc.addRoute(mLocationHistory, distance, elapsed, date);
+                    dataSrc.addRoute(mLocationHistory, mDistance, elapsed, date);
                 } catch (SQLiteException sqle) {
                     sqle.printStackTrace();
                 } finally {
@@ -125,19 +147,6 @@ public class XTrackingService extends Service {
         stopSelf(); // service is no longer needed
     }
 
-    private float calcDistance(ArrayList<Location> locations) {
-        float distance = 0; // accumulator
-        for (int i = 0; i < locations.size(); i++) {
-            if (i + 1 < locations.size()) {
-                Location l0 = locations.get(i),
-                        l1 = locations.get(i + 1); // consecutive locations
-                float d = l0.distanceTo(l1);
-                distance += d;
-            }
-        }
-        return distance; // meters
-    }
-
     // for tracking elapsed time
     private final Stopwatch mStopwatch = new Stopwatch();
     // location data
@@ -145,6 +154,9 @@ public class XTrackingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, R.string.tracking_started, Toast.LENGTH_SHORT).show();
+        IS_RUNNING = true;
+
         // choose the best provider based on criteria
         String bestProvider = chooseLocationProvider();
         // start tracking user location
@@ -174,9 +186,15 @@ public class XTrackingService extends Service {
                 mLocationListener);
     }
 
+    private float mDistance = 0; // meters
+
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+            if (!mLocationHistory.isEmpty()) { // update total travel distance
+                int lastIndex = mLocationHistory.size() - 1;
+                mDistance += mLocationHistory.get(lastIndex).distanceTo(location);
+            }
             // add location point to the list
             mLocationHistory.add(location);
         }
@@ -198,8 +216,8 @@ public class XTrackingService extends Service {
     };
 
     // little class for easily tracking elapsed time in milliseconds
-    class Stopwatch {
-        long mStartTime, mElapsedTime = 0;
+    private class Stopwatch {
+        long mStartTime = -1, mElapsedTime = 0;
 
         void start() {
             mStartTime = System.currentTimeMillis();
@@ -208,16 +226,22 @@ public class XTrackingService extends Service {
         long stop() {
             // add the most recent elapsed time
             mElapsedTime += System.currentTimeMillis() - mStartTime;
+            mStartTime = -1;
             return mElapsedTime;
         }
 
-        void reset() {
-            mElapsedTime = 0;
+        long check() {
+            if (mStartTime == -1) {
+                return mElapsedTime;
+            } else {
+                return mElapsedTime + System.currentTimeMillis() - mStartTime;
+            }
         }
     }
 
     @Override
     public void onDestroy() {
+        IS_RUNNING = false;
         // do cleanup
         unregisterReceiver(mReciever);
         mLocationManager.removeUpdates(mLocationListener);

@@ -46,8 +46,7 @@ public class ShadowedTextView extends TextView {
     }
 
     private void init() {
-        // force center gravity
-        setGravity(Gravity.CENTER);
+
     }
 
     @Override
