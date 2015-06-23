@@ -12,7 +12,6 @@ import android.graphics.Point;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
@@ -68,10 +67,12 @@ public class RoundButton extends Button {
         mCenter = new Point(getWidth() / 2, getHeight() / 2); // center of the button
     }
 
+    private boolean mClickAnimationActive = false;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled()) return false;
-        
+
         // check if this touch is within the button radius
         float x = Math.abs(event.getX() - mCenter.x),
                 y = Math.abs(event.getY() - mCenter.y); // distance from the button center
@@ -96,17 +97,19 @@ public class RoundButton extends Button {
             valAnim.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    // do nothing
+                    mClickAnimationActive = true;
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    mClickAnimationActive = false;
                     percentOfRadius = 0; // remove the animation overlay
                     performClick();
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
+                    mClickAnimationActive = false;
                     percentOfRadius = 0; // remove the animation overlay
                 }
 
@@ -177,6 +180,13 @@ public class RoundButton extends Button {
             mPaint.setShader(null); // remove radial gradient
             canvas.drawBitmap(finalBitmap, mCenter.x - finalBitmap.getWidth() / 2,
                     mCenter.y - finalBitmap.getHeight() / 2, mPaint);
+        }
+
+        // add a scrim if the button is disabled
+        if (!isEnabled() && !mClickAnimationActive) {
+            mPaint.setShader(null); // remove shader
+            mPaint.setColor(0xaaffffff); // faded white
+            canvas.drawCircle(mCenter.x, mCenter.y, mRadius, mPaint);
         }
     }
 
