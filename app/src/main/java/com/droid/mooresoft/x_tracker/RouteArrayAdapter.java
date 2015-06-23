@@ -42,22 +42,13 @@ public class RouteArrayAdapter extends CursorAdapter {
         // route distance
         TextView distanceView = (TextView) view.findViewById(R.id.route_item_distance),
                 unitsView = (TextView) view.findViewById(R.id.route_item_distance_units);
-        float distance = cursor.getFloat(mDistanceIndex);
-        DecimalFormat decimalFormat = new DecimalFormat("0.0");
-        distanceView.setText(decimalFormat.format(distance));
+        float meters = cursor.getFloat(mDistanceIndex);
+        float miles = Utils.metersToMiles(meters);
+        distanceView.setText(Utils.toFormatedDistance(miles));
 
         TextView timeView = (TextView) view.findViewById(R.id.route_item_elapsed_time);
-        long elapsed = cursor.getLong(mElapsedTimeIndex); // milliseconds
-        int oneSecond = 1000 * 60, oneMinute = oneSecond * 60, oneHour = oneMinute * 60;
-        // break time into hours, minutes, and seconds
-        int hours = (int) (elapsed / oneHour);
-        elapsed -= hours * oneHour;
-        int minutes = (int) (elapsed / oneMinute);
-        elapsed -= minutes * oneMinute;
-        int seconds = (int) elapsed / oneSecond;
-        decimalFormat = new DecimalFormat("00");
-        timeView.setText(decimalFormat.format(hours) + ":" + decimalFormat.format(minutes) + ":" +
-                decimalFormat.format(seconds));
+        long millis = cursor.getLong(mElapsedTimeIndex); // milliseconds
+        timeView.setText(Utils.millisToFormatedTime(millis));
 
         // date of exercise
         TextView dateView = (TextView) view.findViewById(R.id.route_item_date);
