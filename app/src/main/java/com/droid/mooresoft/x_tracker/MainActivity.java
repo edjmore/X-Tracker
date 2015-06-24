@@ -61,9 +61,15 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent; // for starting new activities
         switch (item.getItemId()) {
             case R.id.main_begin_exercise:
-                Intent intent = new Intent(this, ControlsActivity.class);
+                intent = new Intent(this, ControlsActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.main_settings:
+                intent = new Intent(this, PreferenceActivity.class);
                 startActivity(intent);
                 return true;
         }

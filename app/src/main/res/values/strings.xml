@@ -4,4 +4,7 @@
     <string name="tracking_paused">eXercise Paused</string>
     <string name="tracking_resumed">eXercise Resumed</string>
     <string name="tracking_ended">eXercise Ended</string>
+    <string name="preference_units">Distance Units</string>
+    <string name="preference_units_summary">Metric or imperial units</string>
+    <string name="key_preference_units">key_pref_dist</string>
 </resources>
