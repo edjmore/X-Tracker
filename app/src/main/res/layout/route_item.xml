@@ -20,7 +20,9 @@
             android:gravity="center"
             android:text="27.12"
             android:textColor="@color/theme_orange"
-            android:textSize="48sp" />
+            android:textSize="48sp"
+            app:shadowed_text_view_shadow_dx="6"
+            app:shadowed_text_view_shadow_dy="6" />
 
         <TextView
             android:id="@+id/route_item_distance_units"
@@ -48,8 +50,8 @@
         android:text="00:00:01"
         android:textColor="@color/theme_text"
         android:textSize="26sp"
-        app:shadowed_text_view_shadow_dx="6"
-        app:shadowed_text_view_shadow_dy="6" />
+        app:shadowed_text_view_shadow_dx="4"
+        app:shadowed_text_view_shadow_dy="4" />
 
     <TextView
         android:id="@+id/route_item_date"
