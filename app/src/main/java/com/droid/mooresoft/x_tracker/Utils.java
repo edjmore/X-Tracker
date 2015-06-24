@@ -32,6 +32,12 @@ public class Utils {
     }
 
     public static String toFormatedDistance(float distance) {
-        return new DecimalFormat("0.0").format(distance);
+        return new DecimalFormat("0.00").format(distance);
+    }
+
+    public static float euclidDistance(double x, double y) {
+        double x2 = Math.pow(x, 2);
+        double y2 = Math.pow(y, 2);
+        return (float) Math.pow(x2 + y2, 0.5);
     }
 }

@@ -93,37 +93,6 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         }
     }
 
-    private ArrayList<Location> getMockLocationHistory() {
-        ArrayList<Location> locationHistory = new ArrayList<>();
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location l0 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        l0.setSpeed(0);
-        Location l1 = new Location(l0);
-        l1.setLongitude(l0.getLongitude() + 0.01);
-        l1.setSpeed(2);
-        Location l2 = new Location(l1);
-        l2.setLatitude(l1.getLatitude() + 0.02);
-        l2.setSpeed(8);
-        Location l3 = new Location(l2);
-        l3.setLongitude(l2.getLongitude() - 0.01);
-        l3.setSpeed(1);
-        Location l4 = new Location(l3);
-        l4.setLongitude(l3.getLongitude() - 0.03);
-        l4.setLatitude(l3.getLatitude() - 0.01);
-        l4.setSpeed(3);
-        Location l5 = new Location(l4);
-        l5.setLatitude(l4.getLatitude() - 0.01);
-        l5.setLongitude(l4.getLongitude() - 0.02);
-        l5.setSpeed(5);
-        locationHistory.add(l0);
-        locationHistory.add(l1);
-        locationHistory.add(l2);
-        locationHistory.add(l3);
-        locationHistory.add(l4);
-        locationHistory.add(l5);
-        return locationHistory;
-    }
-
     private void drawRoute(final GoogleMap googleMap, final ArrayList<Location> locations) {
         // temporarily disable user interation until all drawing is complete
         final UiSettings uiSettings = googleMap.getUiSettings();
@@ -144,7 +113,6 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         }
         final float maxSpeed = ms; // will need this later
         final LatLngBounds bounds = builder.build();
-        Log.d(getLocalClassName(), bounds.toString());
         // padding is one tenth of map view width
         int padding = mMapFragment.getView().getWidth() / 10;
 
@@ -166,9 +134,21 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
 
                         // gradient paint
                         final Paint paint = new Paint();
-                        paint.setStrokeWidth(16); // TODO: make width a geographic constant
-                        paint.setAntiAlias(true);
-                        paint.setDither(true);
+                        paint.setAntiAlias(true); // sharpen diagonals
+                        paint.setDither(true); // improve colors
+                        // want the width of this paint to be just smaller than a road width
+                        Location upRight = new Location("dummy_provider"),
+                                lowLeft = new Location(upRight);
+                        // set to corners
+                        upRight.setLatitude(bounds.northeast.latitude);
+                        upRight.setLongitude(bounds.northeast.longitude);
+                        lowLeft.setLatitude(bounds.southwest.latitude);
+                        lowLeft.setLongitude(bounds.southwest.longitude);
+                        // get geographic distance and pixel distance between corners
+                        float geoDistance = upRight.distanceTo(lowLeft);
+                        float pixelDistance = Utils.euclidDistance(width, height);
+                        float pixPerMeter = pixelDistance / geoDistance;
+                        paint.setStrokeWidth(10 * pixPerMeter);
 
                         final Handler uiHandler = new Handler(); // for posting to UI thread
                         final Runnable overlayToMap = new Runnable() {
@@ -233,7 +213,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
             float r = ((mMaxSpeed - speed) / mMaxSpeed) * 255, // slower speeds are red...
                     g = (speed / mMaxSpeed) * 255, // ...and faster speeds are more green
                     b = 0;
-            return Color.argb(222, (int) r, (int) g, (int) b);
+            return Color.argb(255, (int) r, (int) g, (int) b);
         }
     }
 
