@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,14 @@ public class ControlsActivity extends ActionBarActivity {
         mResumeButton = (RoundButton) findViewById(R.id.controls_resume);
         mPauseButton = (RoundButton) findViewById(R.id.controls_pause);
         mEndButton = (RoundButton) findViewById(R.id.controls_end);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.controls_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

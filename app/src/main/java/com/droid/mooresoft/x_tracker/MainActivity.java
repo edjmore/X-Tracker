@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -46,6 +50,26 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.main_begin_exercise:
+                Intent intent = new Intent(this, ControlsActivity.class);
+                startActivity(intent);
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -67,13 +91,6 @@ public class MainActivity extends ActionBarActivity {
             sqle.printStackTrace();
         } finally {
             if (dataSrc != null) dataSrc.close();
-        }
-    }
-
-    public void performClick(View view) {
-        if (view.getId() == R.id.main_begin_exercise) {
-            Intent intent = new Intent(this, ControlsActivity.class);
-            startActivity(intent);
         }
     }
 }

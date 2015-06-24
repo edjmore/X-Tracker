@@ -14,6 +14,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +43,7 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
     private MapFragment mMapFragment;
     private ArrayList<Location> mLocations;
     private GroundOverlay mOverlay;
+    private long mRouteId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,14 +66,40 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
     private TextView mDistView, mTimeView, mCalView, mUnitsView;
 
     private void init() {
-        // TODO: change to something relevant
-        getSupportActionBar().setTitle(R.string.app_name);
-
         // text views
         mDistView = (TextView) findViewById(R.id.details_distance);
         mTimeView = (TextView) findViewById(R.id.details_stopwatch);
         mCalView = (TextView) findViewById(R.id.details_calories);
         mUnitsView = (TextView) findViewById(R.id.details_units);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.details_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.details_delete:
+                // delete this route
+                DataSource dataSrc = new DataSource(this);
+                try {
+                    dataSrc.open();
+                    dataSrc.deleteRoute(mRouteId);
+                } catch (SQLiteException sqle) {
+                    sqle.printStackTrace();
+                } finally {
+                    if (dataSrc != null) dataSrc.close();
+                }
+                // done with this activity
+                finish();
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -86,9 +116,9 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
 
     private ArrayList<Location> fetchRouteLocations() {
         // get route ID
-        long routeId = getIntent().getLongExtra(DatabaseHelper.ROUTE_ID, -1);
+        mRouteId = getIntent().getLongExtra(DatabaseHelper.ROUTE_ID, -1);
 
-        if (routeId == -1) {
+        if (mRouteId == -1) {
             return null;
 
         } else {
@@ -96,7 +126,7 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
             DataSource dataSrc = new DataSource(this);
             try {
                 dataSrc.open();
-                locations = dataSrc.fetchLocationData(routeId);
+                locations = dataSrc.fetchLocationData(mRouteId);
             } catch (SQLiteException sqle) {
                 sqle.printStackTrace();
             } finally {
