@@ -3,9 +3,11 @@ package com.droid.mooresoft.x_tracker;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -26,17 +28,21 @@ public class ControlsActivity extends ActionBarActivity {
         init();
     }
 
-    private TextView mDistanceView, mStopwatchView;
+    private TextView mDistanceView, mStopwatchView, mUnitsView;
     private RoundButton mResumeButton, mPauseButton, mEndButton;
+    private SharedPreferences mPrefs;
 
     private void init() {
         // text views
         mDistanceView = (TextView) findViewById(R.id.controls_distance);
         mStopwatchView = (TextView) findViewById(R.id.controls_stopwatch);
+        mUnitsView = (TextView) findViewById(R.id.controls_units);
         // buttons
         mResumeButton = (RoundButton) findViewById(R.id.controls_resume);
         mPauseButton = (RoundButton) findViewById(R.id.controls_pause);
         mEndButton = (RoundButton) findViewById(R.id.controls_end);
+        // user preferences
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
@@ -92,13 +98,20 @@ public class ControlsActivity extends ActionBarActivity {
                 long elapsed = mBoundService.getElapsedTime();
 
                 // convert to appropriate units and format
-                float miles = Utils.metersToMiles(distance);
-                String distString = Utils.toFormatedDistance(miles);
+                String units = mPrefs.getString(getString(R.string.key_preference_units), "miles");
+                float uDist;
+                if (units.equals("miles")) {
+                    uDist = Utils.metersToMiles(distance);
+                } else {
+                    uDist = Utils.metersToKilometers(distance);
+                }
+                String distString = Utils.toFormatedDistance(uDist);
                 String timeString = Utils.millisToFormatedTime(elapsed);
 
                 // update views
                 mDistanceView.setText(distString);
                 mStopwatchView.setText(timeString);
+                mUnitsView.setText(units);
             }
         }
     };

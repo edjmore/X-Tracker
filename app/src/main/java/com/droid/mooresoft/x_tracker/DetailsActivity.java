@@ -1,6 +1,7 @@
 package com.droid.mooresoft.x_tracker;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,6 +13,7 @@ import android.graphics.Shader;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -59,11 +61,22 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
 
         // get data from intent and populate views
         Intent details = getIntent();
-        mDistView.setText(details.getStringExtra(DatabaseHelper.ROUTE_DISTANCE));
+        float meters = details.getFloatExtra(DatabaseHelper.ROUTE_DISTANCE, 0);
+        // convert to appropriate units and format
+        String units = mPrefs.getString(getString(R.string.key_preference_units), "miles");
+        float uDist;
+        if (units.equals("miles")) {
+            uDist = Utils.metersToMiles(meters);
+        } else {
+            uDist = Utils.metersToKilometers(meters);
+        }
+        mDistView.setText(Utils.toFormatedDistance(uDist));
+        mUnitsView.setText(units);
         mTimeView.setText(details.getStringExtra(DatabaseHelper.ROUTE_ELAPSED_TIME));
     }
 
     private TextView mDistView, mTimeView, mCalView, mUnitsView;
+    private SharedPreferences mPrefs;
 
     private void init() {
         // text views
@@ -71,6 +84,8 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
         mTimeView = (TextView) findViewById(R.id.details_stopwatch);
         mCalView = (TextView) findViewById(R.id.details_calories);
         mUnitsView = (TextView) findViewById(R.id.details_units);
+        // user preferences
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override

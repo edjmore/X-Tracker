@@ -1,8 +1,10 @@
 package com.droid.mooresoft.x_tracker;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ public class RouteArrayAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
     private int mIdIndex, mDistanceIndex, mElapsedTimeIndex, mDateIndex;
+    private String mUnits;
 
     public RouteArrayAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
@@ -30,6 +33,9 @@ public class RouteArrayAdapter extends CursorAdapter {
         mDistanceIndex = cursor.getColumnIndex(DatabaseHelper.ROUTE_DISTANCE);
         mElapsedTimeIndex = cursor.getColumnIndex(DatabaseHelper.ROUTE_ELAPSED_TIME);
         mDateIndex = cursor.getColumnIndex(DatabaseHelper.ROUTE_DATE);
+        // user preferences
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        mUnits = prefs.getString(context.getString(R.string.key_preference_units), "miles");
     }
 
     @Override
@@ -43,8 +49,14 @@ public class RouteArrayAdapter extends CursorAdapter {
         TextView distanceView = (TextView) view.findViewById(R.id.route_item_distance),
                 unitsView = (TextView) view.findViewById(R.id.route_item_distance_units);
         float meters = cursor.getFloat(mDistanceIndex);
-        float miles = Utils.metersToMiles(meters);
-        distanceView.setText(Utils.toFormatedDistance(miles));
+        float uDist;
+        if (mUnits.equals("miles")) {
+            uDist = Utils.metersToMiles(meters);
+        } else {
+            uDist = Utils.metersToKilometers(meters);
+        }
+        distanceView.setText(Utils.toFormatedDistance(uDist));
+        unitsView.setText(mUnits);
 
         TextView timeView = (TextView) view.findViewById(R.id.route_item_elapsed_time);
         long millis = cursor.getLong(mElapsedTimeIndex); // milliseconds
@@ -60,5 +72,7 @@ public class RouteArrayAdapter extends CursorAdapter {
         // view tag
         int id = cursor.getInt(mIdIndex);
         view.setId(id);
+        // tag distance
+        view.setTag(meters);
     }
 }

@@ -40,9 +40,9 @@ public class MainActivity extends ActionBarActivity {
                 Intent details = new Intent(MainActivity.this, DetailsActivity.class);
                 details.putExtra(DatabaseHelper.ROUTE_ID, routeId); // ID
                 // add in route distance and time
-                String distString = ((TextView) view.findViewById(R.id.route_item_distance)).getText().toString(),
-                        timeString = ((TextView) view.findViewById(R.id.route_item_elapsed_time)).getText().toString();
-                details.putExtra(DatabaseHelper.ROUTE_DISTANCE, distString);
+                String timeString = ((TextView) view.findViewById(R.id.route_item_elapsed_time)).getText().toString();
+                float meters = (float) view.getTag();
+                details.putExtra(DatabaseHelper.ROUTE_DISTANCE, meters);
                 details.putExtra(DatabaseHelper.ROUTE_ELAPSED_TIME, timeString);
                 // start route details activity
                 startActivity(details);
