@@ -1,5 +1,6 @@
 package com.droid.mooresoft.x_tracker;
 
+import android.content.Intent;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,9 +12,11 @@ import android.graphics.Shader;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -49,11 +52,24 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
         mMapFragment = MapFragment.newInstance();
         mMapFragment.getMapAsync(this);
         getFragmentManager().beginTransaction().add(R.id.map_container, mMapFragment).commit();
+
+        // get data from intent and populate views
+        Intent details = getIntent();
+        mDistView.setText(details.getStringExtra(DatabaseHelper.ROUTE_DISTANCE));
+        mTimeView.setText(details.getStringExtra(DatabaseHelper.ROUTE_ELAPSED_TIME));
     }
+
+    private TextView mDistView, mTimeView, mCalView, mUnitsView;
 
     private void init() {
         // TODO: change to something relevant
         getSupportActionBar().setTitle(R.string.app_name);
+
+        // text views
+        mDistView = (TextView) findViewById(R.id.details_distance);
+        mTimeView = (TextView) findViewById(R.id.details_stopwatch);
+        mCalView = (TextView) findViewById(R.id.details_calories);
+        mUnitsView = (TextView) findViewById(R.id.details_units);
     }
 
     @Override
@@ -70,7 +86,7 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
 
     private ArrayList<Location> fetchRouteLocations() {
         // get route ID
-        long routeId = getIntent().getLongExtra("id", -1);
+        long routeId = getIntent().getLongExtra(DatabaseHelper.ROUTE_ID, -1);
 
         if (routeId == -1) {
             return null;
@@ -126,7 +142,9 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
                         int width = upperRight.x - lowerLeft.x,
                                 height = lowerLeft.y - upperRight.y; // pixels
 
-                        final Bitmap bitmap = Bitmap.createBitmap(width + 1, height + 1, Bitmap.Config.ARGB_8888);
+                        // ensure non-zero bitmap
+                        final Bitmap bitmap = Bitmap.createBitmap(width + 1 + width, height + 1 + height,
+                                Bitmap.Config.ARGB_8888);
                         final Canvas canvas = new Canvas(bitmap);
                         final Point origin = new Point(lowerLeft.x, upperRight.y); // upper left of canvas
 
@@ -147,9 +165,9 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
                         float geoDistance = upRight.distanceTo(lowLeft);
                         float pixelDistance = Utils.euclidDistance(width, height);
                         float pixPerMeter = pixelDistance / geoDistance;
-                        // width is ~15 meters (due of latitude distortion, this is a big opproximation
+                        // width is ~27 meters (due of latitude distortion, this is a big opproximation
                         // for routes which cover large portions of the world map)
-                        paint.setStrokeWidth(15 * pixPerMeter);
+                        paint.setStrokeWidth(27 * pixPerMeter);
 
                         final Handler uiHandler = new Handler(); // for posting to UI thread
                         final Runnable overlayToMap = new Runnable() {
@@ -231,6 +249,9 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
                 canvasPoint = new Point();
         canvasPoint.x = screenPoint.x - canvasOrigin.x;
         canvasPoint.y = screenPoint.y - canvasOrigin.y;
+        // canvas dimensions are doubled to improve quality
+        canvasPoint.x *= 2;
+        canvasPoint.y *= 2;
         return canvasPoint;
     }
 }

@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 /**
  * Created by Ed on 6/21/15.
@@ -31,9 +32,15 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 long routeId = view.getId();
-                // TODO: want to start the route details activity
+                // store route details in the intent
                 Intent details = new Intent(MainActivity.this, DetailsActivity.class);
-                details.putExtra("id", routeId);
+                details.putExtra(DatabaseHelper.ROUTE_ID, routeId); // ID
+                // add in route distance and time
+                String distString = ((TextView) view.findViewById(R.id.route_item_distance)).getText().toString(),
+                        timeString = ((TextView) view.findViewById(R.id.route_item_elapsed_time)).getText().toString();
+                details.putExtra(DatabaseHelper.ROUTE_DISTANCE, distString);
+                details.putExtra(DatabaseHelper.ROUTE_ELAPSED_TIME, timeString);
+                // start route details activity
                 startActivity(details);
             }
         });
