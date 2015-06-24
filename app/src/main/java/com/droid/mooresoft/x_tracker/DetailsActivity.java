@@ -111,8 +111,8 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
         }
         final float maxSpeed = ms; // will need this later
         final LatLngBounds bounds = builder.build();
-        // padding is one tenth of map view width
-        int padding = mMapFragment.getView().getWidth() / 10;
+        // padding is one twentieth of map view width
+        int padding = mMapFragment.getView().getWidth() / 20;
 
         googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding),
                 new GoogleMap.CancelableCallback() { // need to wait for zoom before we draw the route
@@ -147,9 +147,9 @@ public class DetailsActivity extends ActionBarActivity implements OnMapReadyCall
                         float geoDistance = upRight.distanceTo(lowLeft);
                         float pixelDistance = Utils.euclidDistance(width, height);
                         float pixPerMeter = pixelDistance / geoDistance;
-                        // width is ~10 meters (due of latitude distortion, this is a big opproximation
+                        // width is ~15 meters (due of latitude distortion, this is a big opproximation
                         // for routes which cover large portions of the world map)
-                        paint.setStrokeWidth(10 * pixPerMeter);
+                        paint.setStrokeWidth(15 * pixPerMeter);
 
                         final Handler uiHandler = new Handler(); // for posting to UI thread
                         final Runnable overlayToMap = new Runnable() {

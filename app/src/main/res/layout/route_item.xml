@@ -33,31 +33,44 @@
             android:text="miles" />
     </LinearLayout>
 
-    <ImageView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:gravity="center"
-        android:src="@drawable/ic_action_time" />
+        android:layout_weight="2.25">
 
-    <!-- stopwatch -->
-    <com.droid.mooresoft.x_tracker.ShadowedTextView
-        android:id="@+id/route_item_elapsed_time"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1.75"
-        android:gravity="center"
-        android:text="00:00:01"
-        android:textColor="@color/theme_text"
-        android:textSize="26sp"
-        app:shadowed_text_view_shadow_dx="4"
-        app:shadowed_text_view_shadow_dy="4" />
+        <TextView
+            android:id="@+id/route_item_date"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.5"
+            android:gravity="center"
+            android:text="3/19/1995" />
 
-    <TextView
-        android:id="@+id/route_item_date"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="top|center_horizontal"
-        android:text="3/19/1995" />
+        <LinearLayout
+            android:layout_weight="4"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:src="@drawable/ic_action_time" />
+
+            <!-- stopwatch -->
+            <com.droid.mooresoft.x_tracker.ShadowedTextView
+                android:id="@+id/route_item_elapsed_time"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.75"
+                android:gravity="center"
+                android:text="00:00:01"
+                android:textColor="@color/theme_text"
+                android:textSize="26sp"
+                app:shadowed_text_view_shadow_dx="4"
+                app:shadowed_text_view_shadow_dy="4" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
