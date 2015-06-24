@@ -32,7 +32,7 @@ public class MainActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 long routeId = view.getId();
                 // TODO: want to start the route details activity
-                Intent details = new Intent(MainActivity.this, MapActivity.class);
+                Intent details = new Intent(MainActivity.this, DetailsActivity.class);
                 details.putExtra("id", routeId);
                 startActivity(details);
             }

@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MapActivity"
+            android:name=".DetailsActivity"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity

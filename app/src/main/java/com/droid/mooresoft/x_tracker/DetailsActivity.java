@@ -1,6 +1,5 @@
 package com.droid.mooresoft.x_tracker;
 
-import android.app.ActionBar;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,15 +9,11 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Shader;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
-import android.view.Menu;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,7 +22,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -38,7 +32,7 @@ import java.util.ArrayList;
 /**
  * Created by Ed on 6/11/15.
  */
-public class MapActivity extends ActionBarActivity implements OnMapReadyCallback {
+public class DetailsActivity extends ActionBarActivity implements OnMapReadyCallback {
 
     private MapFragment mMapFragment;
     private ArrayList<Location> mLocations;
@@ -47,7 +41,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.map_activity);
+        setContentView(R.layout.details_activity);
 
         init();
 
@@ -64,11 +58,11 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
+        addScrim();
         mLocations = fetchRouteLocations();
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                addScrim();
                 if (mLocations != null && !mLocations.isEmpty()) drawRoute(googleMap, mLocations);
             }
         });
@@ -211,7 +205,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
 
     private void addScrim() {
         FrameLayout parent = (FrameLayout) findViewById(R.id.map_container);
-        ImageView scrim = new ImageView(MapActivity.this);
+        ImageView scrim = new ImageView(DetailsActivity.this);
         scrim.setImageDrawable(getResources().getDrawable(R.drawable.rectangle_gradient));
         parent.addView(scrim, FrameLayout.LayoutParams.MATCH_PARENT);
     }
