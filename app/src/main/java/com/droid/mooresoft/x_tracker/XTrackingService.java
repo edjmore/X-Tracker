@@ -180,8 +180,8 @@ public class XTrackingService extends Service {
     }
 
     private void beginLocationTracking(String bestProvider) {
-        long minTime = 3 * 1000; // milliseconds
-        float minDistance = 20; // meters
+        long minTime = 2 * 1000; // milliseconds
+        float minDistance = 10; // meters
         mLocationManager.requestLocationUpdates(bestProvider, minTime, minDistance,
                 mLocationListener);
     }

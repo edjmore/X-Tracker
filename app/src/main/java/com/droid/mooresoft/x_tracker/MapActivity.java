@@ -1,5 +1,6 @@
 package com.droid.mooresoft.x_tracker;
 
+import android.app.ActionBar;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,6 +16,8 @@ import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -65,6 +68,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
+                addScrim();
                 if (mLocations != null && !mLocations.isEmpty()) drawRoute(googleMap, mLocations);
             }
         });
@@ -94,7 +98,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
     }
 
     private void drawRoute(final GoogleMap googleMap, final ArrayList<Location> locations) {
-        // temporarily disable user interation until all drawing is complete
+        // disable user interation until all drawing is complete
         final UiSettings uiSettings = googleMap.getUiSettings();
         uiSettings.setAllGesturesEnabled(false);
         // remove the current overlay
@@ -136,6 +140,7 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
                         final Paint paint = new Paint();
                         paint.setAntiAlias(true); // sharpen diagonals
                         paint.setDither(true); // improve colors
+
                         // want the width of this paint to be just smaller than a road width
                         Location upRight = new Location("dummy_provider"),
                                 lowLeft = new Location(upRight);
@@ -148,6 +153,8 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
                         float geoDistance = upRight.distanceTo(lowLeft);
                         float pixelDistance = Utils.euclidDistance(width, height);
                         float pixPerMeter = pixelDistance / geoDistance;
+                        // width is ~10 meters (due of latitude distortion, this is a big opproximation
+                        // for routes which cover large portions of the world map)
                         paint.setStrokeWidth(10 * pixPerMeter);
 
                         final Handler uiHandler = new Handler(); // for posting to UI thread
@@ -200,6 +207,13 @@ public class MapActivity extends ActionBarActivity implements OnMapReadyCallback
                         // TODO: retry the camera update
                     }
                 });
+    }
+
+    private void addScrim() {
+        FrameLayout parent = (FrameLayout) findViewById(R.id.map_container);
+        ImageView scrim = new ImageView(MapActivity.this);
+        scrim.setImageDrawable(getResources().getDrawable(R.drawable.rectangle_gradient));
+        parent.addView(scrim, FrameLayout.LayoutParams.MATCH_PARENT);
     }
 
     private class ColorScale {
